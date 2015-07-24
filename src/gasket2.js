@@ -5,10 +5,22 @@ var gl;
 
 var points = [];
 
-var NumTimesToSubdivide = 7;
+var NumTimesToSubdivide = 5;
+var fColor;
+const black = vec4(0.0, 0.0, 0.0, 1.0);
+const red = vec4(1.0, 0.0, 0.0, 1.0);
+var bufferId;
 
 var theta=1;
 var thetaPos;
+ 
+ // First, initialize the corners of our gasket with three points.
+    var vertices = [
+        vec2( -1, -1 ),
+        vec2(  0,  1 ),
+        vec2(  1, -1 )
+    ];
+    
 window.onload = function init()
 {
     canvas = document.getElementById( "gl-canvas" );
@@ -19,14 +31,6 @@ window.onload = function init()
     //
     //  Initialize our data for the Sierpinski Gasket
     //
-
-    // First, initialize the corners of our gasket with three points.
-
-    var vertices = [
-        vec2( -1, -1 ),
-        vec2(  0,  1 ),
-        vec2(  1, -1 )
-    ];
 
     divideTriangle( vertices[0], vertices[1], vertices[2],
                     NumTimesToSubdivide);
@@ -45,7 +49,7 @@ window.onload = function init()
 
     // Load the data into the GPU
 
-    var bufferId = gl.createBuffer();
+    bufferId = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, bufferId );
     gl.bufferData( gl.ARRAY_BUFFER, flatten(points), gl.STATIC_DRAW );
 
@@ -53,6 +57,7 @@ window.onload = function init()
 
     var vPosition = gl.getAttribLocation( program, "vPosition" );
     thetaPos=gl.getUniformLocation(program,"theta");
+    fColor = gl.getUniformLocation(program,"fColor");
     gl.uniform1f(thetaPos,theta);
      
     gl.vertexAttribPointer( vPosition, 2, gl.FLOAT, false, 0, 0 );
@@ -71,7 +76,7 @@ function divideTriangle( a, b, c, count )
 
     // check for end of recursion
 
-    if ( count === 0 ) {
+    if ( count === 0 || count == "0" ) {
         triangle( a, b, c );
     }
     else {
@@ -99,9 +104,28 @@ function updateAngle(value){
     console.log(theta);  
 }
 
+function updateTess(value){
+    console.log("value: ", value);
+    NumTimesToSubdivide=value;
+    points=[];
+    divideTriangle( vertices[0], vertices[1], vertices[2],
+                    NumTimesToSubdivide);
+    gl.bindBuffer( gl.ARRAY_BUFFER, bufferId );
+  //  gl.bufferSubData( gl.ARRAY_BUFFER, 0,flatten(points) );
+   gl.bufferData( gl.ARRAY_BUFFER, flatten(points), gl.STATIC_DRAW );
+
+    
+}
+
 function render()
 {
     gl.clear( gl.COLOR_BUFFER_BIT );
+     gl.uniform4fv(fColor, flatten(red));
     gl.drawArrays( gl.TRIANGLES, 0, points.length );
+    gl.uniform4fv(fColor, flatten(black));
+  for(var i=0;i<points.length;i+=3){
+      gl.drawArrays( gl.LINE_LOOP, i, 3 );
+  }
+    
     requestAnimFrame(render);
 }

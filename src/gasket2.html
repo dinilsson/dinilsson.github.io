@@ -27,11 +27,12 @@ main()
 
 <script id="fragment-shader" type="x-shader/x-fragment">
 precision mediump float;
-
+uniform vec4 fColor;
 void
 main()
 {
-    gl_FragColor = vec4( 1.0, 0.0, 0.0, 1.0 );
+    gl_FragColor = fColor;
+    //vec4( 1.0, 0.0, 0.0, 1.0 );
 }
 </script>
 
@@ -45,7 +46,10 @@ main()
 <body>
 Angle: 0
 <input type="range" id="slider" name="angle" min="0" max="6.28" oninput="updateAngle(value)" value="1.0" step="0.1"
-/>2&pi;
+/>2&pi;<br>
+Subdivisions: 0
+<input type="range" id="slider-tess" name="tess" min="0" max="7" oninput="updateTess(value)" value="5"
+/>7<br>
 <canvas id="gl-canvas" width="512" height="512">
 Oops ... your browser doesn't support the HTML5 canvas element
 </canvas>
