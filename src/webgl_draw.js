@@ -8,10 +8,18 @@ var segments=[];
 
 var fColor;
 const black = vec4(0.0, 0.0, 0.0, 1.0);
-const red = vec4(1.0, 0.0, 0.0, 1.0);
+
 var bufferId;
 var drawing=false;
-    
+var red=0;
+var green=0;
+var blue=0;
+
+function segment(points,color){
+  this.points=points;      
+  this.color=color;
+}
+
 window.onload = function init()
 {
     canvas = document.getElementById( "gl-canvas" );
@@ -19,6 +27,7 @@ window.onload = function init()
     canvas.addEventListener("mousedown",mousePressed);
     canvas.addEventListener("mouseup",mouseReleased);
     canvas.addEventListener("mousemove",mouseMove);
+     canvas.style.cursor='default';
     gl = WebGLUtils.setupWebGL( canvas );
     if ( !gl ) { alert( "WebGL isn't available" ); }
 
@@ -70,17 +79,33 @@ function mouseMove(event){
 }
 
 function draw(point){
-  var points=segments[segments.length-1];
+  var seg=segments[segments.length-1];
+  var points=seg.points;
   points.push(point);  
  
+}
+
+function updateRed(value){
+  red=value;
+}
+
+function updateGreen(value){
+  green=value;
+}
+
+function updateBlue(value){
+  blue=value;  
 }
 
 function mousePressed(event){
   var points=[];
   var point=toCanvasCoord(event);
   points.push(point);
-  segments.push(points);
+  var col=[red,green,blue];
+  var seg=new segment(points,col);
+  segments.push(seg);
   drawing=true;
+ 
 }
 
   function toCanvasCoord(event) {
@@ -92,12 +117,14 @@ function render() {
   gl.uniform4fv(fColor, flatten(black));
   
   for (var i = 0; i < segments.length; i++) {
-     var points = segments[i];
+     var seg=segments[i];
+     var points = seg.points;
+     var col=vec4(seg.color[0],seg.color[1],seg.color[2],1.0);
+     gl.uniform4fv(fColor, flatten(col));
      gl.bindBuffer( gl.ARRAY_BUFFER, bufferId );
-     gl.bufferData( gl.ARRAY_BUFFER, flatten(points), gl.STATIC_DRAW );
+     gl.bufferData( gl.ARRAY_BUFFER, flatten(points), gl.STATIC_DRAW );    
      gl.drawArrays(gl.LINE_STRIP, 0, points.length);
   }
   
-
   requestAnimFrame(render);
 }

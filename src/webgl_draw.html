@@ -37,7 +37,39 @@ main()
 <body>
 
 <canvas id="gl-canvas" width="512" height="512" style="border:1px solid #000000;">
-Oops ... your browser doesn't support the HTML5 canvas element
+    Oops ... your browser doesn't support the HTML5 canvas element
 </canvas>
+<br>
+<table>
+    <tr>
+        <td>RED</td>
+        <td>
+            <input type="range" id="slider" name="red" min="0" max="1" oninput="updateRed(value)" value="0" step="0.1" />
+        </td>
+        </tr>
+        <tr>
+            
+        <td>GREEN</td>
+        <td>
+            <input type="range" id="slider" name="green" min="0" max="1" oninput="updateGreen(value)" value="0" step="0.1" />
+        </td>
+        </tr>
+        <tr>
+        <td>BLUE</td>
+        <td>
+            <input type="range" id="slider" name="blue" min="0" max="1" oninput="updateBlue(value)" value="0" step="0.1" />
+        </td>
+    </tr>
+        
+</table>
+ 
+
+
+
+<br>
+
+
+<br>
+
 </body>
 </html>
