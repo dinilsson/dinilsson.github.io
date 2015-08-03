@@ -1,11 +1,24 @@
 "use strict";
 
 var gl;
-var points=[];
+//var points=[];
 var fColor;
 
+var modelViewMatrixLoc;
 const black = vec4(0.0, 0.0, 0.0, 1.0);
 const red = vec4(1.0, 0.0, 0.0, 1.0);
+var bufferId;
+var renderingList=[];
+
+function initEventHandlers(){
+    document.getElementById("sphere_button").onclick=function(event){
+        var r=document.getElementById("sphere_radius").value;
+        var x0=document.getElementById("sphere_x0").value;
+        var y0=document.getElementById("sphere_y0").value;
+        var z0=document.getElementById("sphere_z0").value;
+        renderingList.push(new createSphere(r,[x0,y0,z0]));
+    }
+}
 
 window.onload = function init()
 {
@@ -13,12 +26,8 @@ window.onload = function init()
 
     gl = WebGLUtils.setupWebGL( canvas );
     if ( !gl ) { alert( "WebGL isn't available" ); }
-
-
-    
     
     //  Configure WebGL
-
     gl.viewport( 0, 0, canvas.width, canvas.height );
     gl.clearColor( 1.0, 1.0, 1.0, 1.0 );
     gl.enable(gl.DEPTH_TEST);
@@ -29,19 +38,21 @@ window.onload = function init()
     gl.useProgram( program );
 
     // Load the data into the GPU
-    createSphere();
-    var bufferId = gl.createBuffer();
+   
+    bufferId = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, bufferId );
-    gl.bufferData( gl.ARRAY_BUFFER, flatten(points), gl.STATIC_DRAW );
 
     // Associate out shader variables with our data buffer
 
     var vPosition = gl.getAttribLocation( program, "vPosition" );
-    gl.vertexAttribPointer( vPosition, 3, gl.FLOAT, false, 0, 0 );
+    gl.vertexAttribPointer( vPosition, 4, gl.FLOAT, false, 0, 0 );
     gl.enableVertexAttribArray( vPosition );
     fColor = gl.getUniformLocation(program,"fColor");
+    modelViewMatrixLoc = gl.getUniformLocation( program, "modelViewMatrix" );
     
-
+    initEventHandlers();
+    // renderingList.push(new createSphere(0.1,1,0));
+    // renderingList.push(new createSphere());
     render();
 };
 
@@ -52,26 +63,17 @@ function cartesian(r,phi,theta){
     return [x,y,z];
 }
 
-function vPlus(a,b,length){
-    var out=[];
-    for(var i=0;i<length;i++){
-        out.push(a[i]+b[i]);
-    }
-    return out;
-}
-
-function createSphere(){
-   
-    var theta0=0;
+function unitSphere(){
     
-    var r0=0.5;
- 
-    var x0=0;
-    var y0=0;
-    var z0=0;
-    var xp=[x0,y0,z0];
+}
+function createSphere(r0,x){
+    console.log("create sphere r0: ",r0)
+    this.r0=r0;
+    this.x=x;  
+    var points=[];
+    var theta0=0;
     var phi0=Math.PI/2;
-    var M=6;
+    var M=7;
     var N=2*M;
     var delta=Math.PI/M;
     for (var j = 0; j < M; j++) {
@@ -80,40 +82,43 @@ function createSphere(){
             var phi1 = phi0 - delta;
             
             var p0 = cartesian(r0, phi0, theta0);
-         //   p0=vPlus(p0,xp,3);
             var p1 = cartesian(r0, phi0, theta1);
-           // p1=vPlus(p1,xp,3);
             var p2 = cartesian(r0, phi1, theta0);
-           // p2=vPlus(p1,xp,3);
             var p3 = cartesian(r0, phi1, theta1);
-           // p3=vPlus(p3,xp,3);
-            points.push(vec3(p0[0], p0[1], p0[2]));
-            points.push(vec3(p1[0], p1[1], p1[2]));
-            points.push(vec3(p2[0], p2[1], p2[2]));
-            points.push(vec3(p3[0], p3[1], p3[2]));
+
+            points.push(vec4(p0[0], p0[1], p0[2],1));
+            points.push(vec4(p1[0], p1[1], p1[2],1));
+            points.push(vec4(p2[0], p2[1], p2[2],1));
+            points.push(vec4(p3[0], p3[1], p3[2],1));
             phi0 = phi1;
         }
         theta0=theta1;
     }
-  
+    gl.bindBuffer( gl.ARRAY_BUFFER, bufferId );
+    //bug!
+    gl.bufferData( gl.ARRAY_BUFFER, flatten(points), gl.STATIC_DRAW );
     
-  
-   
-//  points = [
-//         vec3( p0),
-//         vec3( p1),
-//         vec3(  p2)
-//     ];
+    this.render = function () {
+        var modelViewMatrix = translate(x);
+        gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix));
+        gl.uniform4fv(fColor, flatten(red));
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, points.length);
+        gl.uniform4fv(fColor, flatten(black));
+        for (var i = 0; i < points.length; i += 4) {
+            gl.drawArrays(gl.LINE_LOOP, i, 3);
+            gl.drawArrays(gl.LINES, i, 2);
+        }
+        //push back identity matrix.
+        gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(mat4()));
+    }
 }
 
 function render() {
-    gl.clear( gl.COLOR_BUFFER_BIT );
-     gl.uniform4fv(fColor, flatten(red));
-    gl.drawArrays( gl.TRIANGLE_STRIP, 0, points.length );
-    gl.uniform4fv(fColor, flatten(black));
-  
-    for(var i=0;i<points.length;i+=4){
-      gl.drawArrays( gl.LINE_LOOP, i, 3 );
-      gl.drawArrays(gl.LINES,i,2);
-  }
+   
+    gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
+   for(var i=0;i<renderingList.length;i++){
+        renderingList[i].render();
+   }
+     requestAnimFrame(render);
+   
 }

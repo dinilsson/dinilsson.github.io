@@ -1,35 +1,79 @@
 <!DOCTYPE html>
 <html>
-<head>
-<script id="vertex-shader" type="x-shader/x-vertex">
-attribute vec4 vPosition;
-
-void
-main()
-{
-    gl_Position = vPosition;
-}
-</script>
-
-<script id="fragment-shader" type="x-shader/x-fragment">
-precision mediump float;
-uniform vec4 fColor;
-void
-main()
-{
-    gl_FragColor = fColor;//vec4( 1.0, 0.0, 0.0, 1.0 );
-}
-</script>
-
-<script type="text/javascript" src="../Common/webgl-utils.js"></script>
-<script type="text/javascript" src="../Common/initShaders.js"></script>
-<script type="text/javascript" src="../Common/MV.js"></script>
-<script type="text/javascript" src="triangle.js"></script>
-</head>
-
+    
+    <head>
+        <script id="vertex-shader" type="x-shader/x-vertex">
+            attribute vec4 vPosition;
+            uniform mat4 modelViewMatrix;
+            void
+            main()
+            {
+                gl_Position = modelViewMatrix*vPosition;
+            }
+        </script>
+        <script id="fragment-shader" type="x-shader/x-fragment">
+            precision mediump float;
+            uniform vec4 fColor;
+            void
+            main()
+            {
+                gl_FragColor = fColor;//vec4( 1.0, 0.0, 0.0, 1.0 );
+            }
+        </script>
+        <script type="text/javascript" src="../Common/webgl-utils.js"></script>
+        <script type="text/javascript" src="../Common/initShaders.js"></script>
+        <script type="text/javascript" src="../Common/MV.js"></script>
+        <script type="text/javascript" src="triangle.js"></script>
+        
+        <style>
+            input[type="number"] {
+              width:4em;
+            }
+        </style>
+    </head>
+    
 <body>
-<canvas id="gl-canvas" width="512" height="512">
-Oops ... your browser doesn't support the HTML5 canvas element
-</canvas>
+    <div>
+        <canvas id="gl-canvas" width="512" height="512">Oops ... your browser doesn't support the HTML5 canvas element</canvas>
+    </div>
+<table>
+    <tr>
+        <td>
+            <table border="1">
+                <tr>
+                    <td colspan="2"><button id="sphere_button" style="width:100%">Sphere</button></td> 
+                    </tr>
+                 <tr>
+                    <td>Radius:</td><td> <input type="number" id="sphere_radius" min="0" value="1"></input></td>                  
+                </tr>
+                <tr>
+                    <td>x0:</td><td> <input type="number" id="sphere_x0" min="0" value="0"></input></td>                  
+                </tr>
+                <tr>
+                    <td>y0:</td><td> <input type="number"  id="sphere_y0" min="0" value="0"></input></td>                  
+                </tr>
+                <tr>
+                    <td>z0:</td><td> <input type="number" id="sphere_z0" min="0" value="0"></input></td>                  
+                </tr>
+            </table>
+        </td>
+        <td>
+            <table>
+                <tr>
+                    <td><button id="cylinder_button">Cylinder</button></td>
+                </tr>
+            </table>
+        </td>
+        <td>
+            <table>
+                <tr>
+                    <td><button id="cone_button">Cone</button></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+    
 </body>
+
 </html>
