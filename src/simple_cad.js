@@ -4,7 +4,7 @@ var gl;
 //var points=[];
 var fColor;
 
-var modelViewMatrixLoc;
+var modelViewMatrixLoc,projectionMatrixLoc;
 const black = vec4(0.0, 0.0, 0.0, 1.0);
 const red = vec4(1.0, 0.0, 0.0, 1.0);
 var bufferId;
@@ -13,9 +13,17 @@ var spherePoints=[];
 var cylinderPoints=[];
 const at = vec3(0.0, 0.0, 0.0);
 const up = vec3(0.0, 1.0, 0.0);
-var lookRad=0.5;
+var lookRad=0.01;
 var lookTheta=0;
 var lookPhi=0;
+
+var left = -2.0;
+var right = 2.0;
+var ytop = 2.0;
+var bottom = -2.0;
+var near = -10;
+var far = 10;
+
 var eye = vec3( lookRad*Math.sin(lookTheta)*Math.cos(lookPhi),
                     lookRad*Math.sin(lookTheta)*Math.sin(lookPhi),
                     lookRad*Math.cos(lookTheta));
@@ -68,6 +76,7 @@ window.onload = function init()
     gl.enableVertexAttribArray( vPosition );
     fColor = gl.getUniformLocation(program,"fColor");
     modelViewMatrixLoc = gl.getUniformLocation( program, "modelViewMatrix" );
+    projectionMatrixLoc = gl.getUniformLocation( program, "projectionMatrix" );
     initEventHandlers();
  
     spherePoints=unitSphere();
@@ -167,7 +176,7 @@ function createCylinder(r0,x,z){
         gl.bindBuffer( gl.ARRAY_BUFFER, bufferId );
         var modelViewMatrix = mult(translate(x),scalem(r0,r0,z));
         var mLook=lookAt( eye, at, up )
-        modelViewMatrix=mult(mLook,modelViewMatrix);
+        modelViewMatrix=mult(modelViewMatrix,mLook);
         gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix));
         gl.uniform4fv(fColor, flatten(red));
         var length=spherePoints.length+cylinderPoints.length;
@@ -232,6 +241,8 @@ function updateRad(value){
 function render() {
    
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
+   var projectionMatrix = ortho( left, right, bottom, ytop, near, far );
+   gl.uniformMatrix4fv( projectionMatrixLoc, false, flatten(projectionMatrix) );
    for(var i=0;i<renderingList.length;i++){
         renderingList[i].render();
    }

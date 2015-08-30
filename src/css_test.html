@@ -3,14 +3,15 @@
 <head>
 <meta charset="ISO-8859-1">
 <title>SimpleCad</title>
-<style>
-  <script id="vertex-shader" type="x-shader/x-vertex">
+
+<script id="vertex-shader" type="x-shader/x-vertex">
             attribute vec4 vPosition;
             uniform mat4 modelViewMatrix;
+            uniform mat4 projectionMatrix;
             void
             main()
             {
-                gl_Position = modelViewMatrix*vPosition;
+                gl_Position = projectionMatrix*modelViewMatrix*vPosition;
             }
         </script>
         <script id="fragment-shader" type="x-shader/x-fragment">
@@ -28,6 +29,8 @@
         <script type="text/javascript" src="../Common/initShaders.js"></script>
         <script type="text/javascript" src="../Common/MV.js"></script>
         <script type="text/javascript" src="simple_cad.js"></script>
+<style>
+  
         
 div.content{
 	position:relative;
@@ -37,7 +40,7 @@ div.content{
 }
 div.box1 {
     width: 120px;
-    height: 120px;
+    height: 160px;
     padding: 0px;
     border: 5px solid gray;
     margin: 0;
@@ -48,7 +51,7 @@ div.box1 {
   
   div.box2 {
     width: 120px;
-    height: 120px;
+    height: 160px;
     padding: 0px;
     border: 5px solid gray;
     margin: 0;
@@ -59,13 +62,24 @@ div.box1 {
   
 div.box3 {
     width: 120px;
-    height: 120px;
+    height: 160px;
     padding: 0px;
     border: 5px solid gray;
     margin: 0;
       position:absolute;
     top:522px;
     left:260px;     
+  }
+  
+  div.box4{
+    width: 240px;
+    height: 160px;
+    padding: 0px;
+    border: 5px solid gray;
+    margin: 0;
+      position:absolute;
+    top:522px;
+    left:390px;    
   }
 
 div.main{
@@ -107,19 +121,35 @@ div.nav{
 
 <div class="box1" >
   <button id="sphere_button" style="width:100%">Sphere</button>
-    R: <input type="number" id="sphere_radius" min="0" value="1" step="0.1" style="width:80%"></input>
-    X: <input type="number" id="sphere_x0" min="0" value="0" style="width:80%" ></input>
-    Y: <input type="number" id="sphere_y0" min="0" value="0" style="width:80%" ></input>
-    Z: <input type="number" id="sphere_z0" min="0" value="0" style="width:80%"></input>
+    R: <input type="number" id="sphere_radius" min="0" value="0.1" step="0.1" style="width:80%"></input>
+    X: <input type="number" id="sphere_x0" min="0" value="0" step="0.1" style="width:80%" ></input>
+    Y: <input type="number" id="sphere_y0" min="0" value="0" step="0.1" style="width:80%" ></input>
+    Z: <input type="number" id="sphere_z0" min="0" value="0" step="0.1" style="width:80%"></input>
 </div>
 
 <div class="box2">
-
+<button id="cylinder_button" style="width:100%">Cylinder</button>
+    R: <input type="number" id="cylinder_radius" min="0" value="0.1" step="0.1" style="width:80%"></input>
+    H: <input type="number" id="cylinder_z0" min="0" value="0" step="0.1" style="width:80%"></input>
+    X: <input type="number" id="cylinder_x0" min="0" value="0" step="0.1" style="width:80%" ></input>
+    Y: <input type="number" id="cylinder_y0" min="0" value="0" step="0.1" style="width:80%" ></input>
+    Z: <input type="number" id="cylinder_height" min="0" value="0.1" step="0.1" style="width:80%"></input>
+    U: <input type="number" id="CYL_X_U" min="0" value="0" step="0.1" style="width:20%"></input>
+    <input type="number" id="CYL_Y_U" min="0" value="1" step="0.1" style="width:20%"></input>
+    <input type="number" id="CYL_Z_U" min="0" value="0" step="0.1" style="width:20%"></input>
 </div>
 
 <div class="box3">
 
 </div>
+
+<div class="box4">
+    <input type="range" id="slider_phi" name="angle_phi" min="0" max="6.28" oninput="updatePhi(value)" value="1.0" step="0.01"
+ style="width:80%"/>2&pi;
+ <input type="range" id="slider_theta" name="angle_theta" min="0" max="6.28" oninput="updateTheta(value)" value="1.0" step="0.01"
+style="width:80%"/>2&pi;
+<input type="range" id="slider_radius" name="look_radius" min="0" max="10" oninput="updateRad(value)" value="1.0" step="1"
+style="width:80%"/>2&pi;<br>
 </div>
 
 </body>
