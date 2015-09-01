@@ -39,7 +39,10 @@ function initEventHandlers(){
         var y0=document.getElementById("cylinder_y0").value;
         var z0=document.getElementById("cylinder_z0").value;
         var height=document.getElementById("cylinder_height").value;
-        renderingList.push(new createCylinder(r,[x0,y0,z0],height));
+        var xu=document.getElementById("CYL_X_U").value;
+        var yu=document.getElementById("CYL_Y_U").value;
+        var zu=document.getElementById("CYL_Z_U").value;
+        renderingList.push(new createCylinder(r,[x0,y0,z0],[xu,yu,zu],height));
     }
 }
 
@@ -162,19 +165,21 @@ function unitSphere(){
   return points;
 }
 
-function createCylinder(r0,x,height){
+function createCylinder(r0,x,up,height){
     this.r0=r0;
     this.x=x;
+    this.up=up;
     this.height=height;
     console.log("createCylinder");
     if(cylinderPoints.length===0){
         cylinderPoints=unitCylinder();
     }
+    var m1 = mult(translate(x),scalem(r0,r0,height));
+    var mLook=lookAt( eye, at, up );
+    var modelViewMatrix=mult(mLook,m1);
     this.render = function () {
-        gl.bindBuffer( gl.ARRAY_BUFFER, bufferId );
-       var m1 = mult(translate(x),scalem(r0,r0,height));
-       var mLook=lookAt( eye, at, up );
-        var modelViewMatrix=mult(mLook,m1);
+        gl.bindBuffer( gl.ARRAY_BUFFER, bufferId );        
+       
         gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix));
         gl.uniform4fv(fColor, flatten(red));
         var length=spherePoints.length+cylinderPoints.length;
