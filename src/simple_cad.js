@@ -11,22 +11,20 @@ var bufferId;
 var renderingList=[];
 var spherePoints=[];
 var cylinderPoints=[];
+
+var near = 0.3;
+var far = 3.0;
+var radius = 2.0;
+var theta  = 0.0;
+var phi    = 0.0;
+
+var  fovy = 45.0;  // Field-of-view in Y direction angle (in degrees)
+var  aspect=1;       // Viewport aspect ratio
+var eye=vec3(radius*Math.sin(theta)*Math.cos(phi),
+        radius*Math.sin(theta)*Math.sin(phi), radius*Math.cos(theta));
 const at = vec3(0.0, 0.0, 0.0);
 const up = vec3(0.0, 1.0, 0.0);
-var lookRad=0.01;
-var lookTheta=0;
-var lookPhi=0;
 
-var left = -2.0;
-var right = 2.0;
-var ytop = 2.0;
-var bottom = -2.0;
-var near = -10;
-var far = 10;
-
-var eye = vec3( lookRad*Math.sin(lookTheta)*Math.cos(lookPhi),
-                    lookRad*Math.sin(lookTheta)*Math.sin(lookPhi),
-                    lookRad*Math.cos(lookTheta));
 function initEventHandlers(){
     document.getElementById("sphere_button").onclick=function(event){
         var r=document.getElementById("sphere_radius").value;
@@ -164,19 +162,19 @@ function unitSphere(){
   return points;
 }
 
-function createCylinder(r0,x,z){
+function createCylinder(r0,x,height){
     this.r0=r0;
     this.x=x;
-    this.z=z;
+    this.height=height;
     console.log("createCylinder");
     if(cylinderPoints.length===0){
         cylinderPoints=unitCylinder();
     }
     this.render = function () {
         gl.bindBuffer( gl.ARRAY_BUFFER, bufferId );
-        var modelViewMatrix = mult(translate(x),scalem(r0,r0,z));
-        var mLook=lookAt( eye, at, up )
-        modelViewMatrix=mult(modelViewMatrix,mLook);
+       var m1 = mult(translate(x),scalem(r0,r0,height));
+       var mLook=lookAt( eye, at, up );
+        var modelViewMatrix=mult(mLook,m1);
         gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix));
         gl.uniform4fv(fColor, flatten(red));
         var length=spherePoints.length+cylinderPoints.length;
@@ -218,30 +216,27 @@ function createSphere(r0,x){
 }
 
 function updateTheta(value){
-    lookTheta=value;
-    eye = vec3( lookRad*Math.sin(lookTheta)*Math.cos(lookPhi),
-                    lookRad*Math.sin(lookTheta)*Math.sin(lookPhi),
-                    lookRad*Math.cos(lookTheta));
+    theta=value;
+    eye = vec3(radius*Math.sin(theta)*Math.cos(phi),
+        radius*Math.sin(theta)*Math.sin(phi), radius*Math.cos(theta));
 }
 
 function updatePhi(value){
-    lookPhi=value;
-    eye = vec3( lookRad*Math.sin(lookTheta)*Math.cos(lookPhi),
-                    lookRad*Math.sin(lookTheta)*Math.sin(lookPhi),
-                    lookRad*Math.cos(lookTheta));
+    phi=value;
+    eye = vec3(radius*Math.sin(theta)*Math.cos(phi),
+        radius*Math.sin(theta)*Math.sin(phi), radius*Math.cos(theta));
 }
 
 function updateRad(value){
-    lookRad=value;
-    eye = vec3( lookRad*Math.sin(lookTheta)*Math.cos(lookPhi),
-                    lookRad*Math.sin(lookTheta)*Math.sin(lookPhi),
-                    lookRad*Math.cos(lookTheta));
+    radius=value;
+    eye =  vec3(radius*Math.sin(theta)*Math.cos(phi),
+        radius*Math.sin(theta)*Math.sin(phi), radius*Math.cos(theta));
 }
 
 function render() {
    
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
-   var projectionMatrix = ortho( left, right, bottom, ytop, near, far );
+   var projectionMatrix = perspective(fovy, aspect, near, far);
    gl.uniformMatrix4fv( projectionMatrixLoc, false, flatten(projectionMatrix) );
    for(var i=0;i<renderingList.length;i++){
         renderingList[i].render();
